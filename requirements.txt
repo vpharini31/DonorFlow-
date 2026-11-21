@@ -1,0 +1,11 @@
+Flask
+click
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Login
+Flask-WTF
+WTForms-SQLAlchemy
+WTForms[email]
+Werkzeug
+python-dotenv
+qrcode[pil]

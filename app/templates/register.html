@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card text-center">
+            <div class="card-header">
+                <h1 class="card-title">Join Donor Flow</h1>
+            </div>
+            <div class="card-body">
+                <p class="lead">How would you like to get started?</p>
+                <div class="d-grid gap-3 col-md-8 mx-auto">
+                    <a href="{{ url_for('routes.register_user') }}" class="btn btn-primary btn-lg"><i class="bi bi-person-heart"></i> Register as a User/Donor</a>
+                    <a href="{{ url_for('routes.register_home') }}" class="btn btn-secondary btn-lg"><i class="bi bi-house-heart"></i> Register as a Home Admin</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

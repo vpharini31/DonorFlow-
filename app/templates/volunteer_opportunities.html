@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4">Volunteer Opportunities</h1>
+    <p class="lead text-muted">Donate your time and skills to make a direct impact.</p>
+</div>
+
+<div class="row g-4">
+    {% for opportunity in opportunities %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ opportunity.title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    <a href="{{ url_for('routes.home_detail', home_id=opportunity.home.id) }}">{{ opportunity.home.name }}</a>
+                </h6>
+                <p class="card-text">{{ opportunity.description|truncate(150) }}</p>
+                <ul class="list-unstyled mt-3 mb-4">
+                    <li><strong><i class="bi bi-tools text-primary"></i> Skills:</strong> {{ opportunity.skills_required }}</li>
+                    <li><strong><i class="bi bi-clock-history text-primary"></i> Commitment:</strong> {{ opportunity.time_commitment }}</li>
+                </ul>
+                <div class="mt-auto">
+                    {% if opportunity in current_user.applied_opportunities %}
+                        <button class="btn btn-success disabled"><i class="bi bi-check-circle-fill"></i> Applied</button>
+                    {% else %}
+                        <form action="{{ url_for('routes.apply_for_opportunity', opportunity_id=opportunity.id) }}" method="post">
+                            <button type="submit" class="btn btn-primary">Apply Now</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center">
+        <p class="text-muted fs-5">There are no open volunteer opportunities at the moment. Please check back soon!</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

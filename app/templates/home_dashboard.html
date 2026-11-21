@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard: {{ home.name }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('routes.create_volunteer_opportunity') }}" class="btn btn-sm btn-outline-success"><i class="bi bi-person-plus-fill"></i> Post Volunteer Need</a>
+            <a href="{{ url_for('routes.view_applications') }}" class="btn btn-sm btn-outline-info"><i class="bi bi-person-check-fill"></i> View Applicants</a>
+        </div>
+        <a href="{{ url_for('routes.home_edit') }}" class="btn btn-sm btn-outline-secondary ms-2">
+            <i class="bi bi-pencil-square"></i>
+            Edit Home Details
+        </a>
+    </div>
+</div>
+
+{% if not home.is_verified %}
+<div class="alert alert-warning" role="alert">
+    <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Verification Pending</h4>
+    <p>Your home profile is currently <strong>Unverified</strong>. It will not be visible to donors until the platform administrator verifies your details. Please contact support to expedite this process.</p>
+</div>
+{% endif %}
+
+ <div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-success">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-success"><i class="bi bi-cash-coin"></i> Total Funds Raised</h5>
+                <h3 class="mb-0">₹{{ total_received }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Home Information</h3>
+<div class="card mb-4">
+    <div class="card-body">
+        <p><strong>Address:</strong> {{ home.address }}</p>
+        <p><strong>Description:</strong> {{ home.description }}</p>
+        <p><strong>Number of Occupants:</strong> {{ home.occupant_count }}</p>
+        <p><strong>Public Contact:</strong> {{ home.contact_phone }}</p>
+        <p><strong>Payment/UPI Details:</strong> {{ home.payment_details or 'Not provided' }}</p>
+    </div>
+</div>
+
+<h3>Current Requirements</h3>
+<div class="card mb-4">
+    <div class="card-body">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th style="width: 20%;">Groceries</th>
+                    <td>{{ home.req_grocery or 'No specific needs listed.' }}</td>
+                </tr>
+                <tr>
+                    <th>Clothing</th>
+                    <td>{{ home.req_clothes or 'No specific needs listed.' }}</td>
+                </tr>
+                <tr>
+                    <th>Stationary</th>
+                    <td>{{ home.req_stationary or 'No specific needs listed.' }}</td>
+                </tr>
+                <tr>
+                    <th>Medical</th>
+                    <td>{{ home.req_medical or 'No specific needs listed.' }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h3>Recent Donations</h3>
+<ul class="list-group">
+  {% for donation in donations %}
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+          <strong>{{ donation.donor.username }}</strong> donated: 
+          {% if donation.amount %}
+            <strong>₹{{ donation.amount }}</strong> - 
+          {% endif %}
+          {% if donation.transaction_id %}
+            <span class="badge bg-light text-dark border">Ref: {{ donation.transaction_id }}</span>
+          {% endif %}
+          <em>"{{ donation.description }}"</em>
+          <small class="d-block text-muted">On: {{ donation.timestamp.strftime('%Y-%m-%d') }}</small>
+      </div>
+      <div>
+          {% if donation.confirmed %}
+              <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Received on {{ donation.confirmed_on.strftime('%Y-%m-%d %I:%M %p') }}</span>
+          {% else %}
+              <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#confirmModal" data-donation-id="{{ donation.id }}" data-donor-username="{{ donation.donor.username }}">Mark as Received</button>
+          {% endif %}
+      </div>
+  </li>
+  {% else %}
+  <li class="list-group-item">You have not received any donations through the platform yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm Donation and Send Thanks</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="confirmForm" method="post">
+                <div class="modal-body">
+                    <p>You are confirming a donation from <strong id="donorUsername"></strong>.</p>
+                    <div class="mb-3">
+                        <label for="thankYouMessage" class="form-label">Add a personal thank you message (optional):</label>
+                        <textarea class="form-control" id="thankYouMessage" name="thank_you_message" rows="3" placeholder="e.g., Thank you so much for your kindness!"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm and Send Thanks</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const confirmModal = document.getElementById('confirmModal');
+    confirmModal.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+        const donationId = button.getAttribute('data-donation-id');
+        const donorUsername = button.getAttribute('data-donor-username');
+        
+        const modalBodyUsername = confirmModal.querySelector('#donorUsername');
+        const form = confirmModal.querySelector('#confirmForm');
+
+        modalBodyUsername.textContent = donorUsername;
+        form.action = `/donation/${donationId}/confirm`;
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Edit Details for {{ home.name }}</h1>
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <h4 class="mt-4">Basic Information</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.occupant_count.label(class="form-label") }}
+                            {{ form.occupant_count(class="form-control") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.contact_phone.label(class="form-label") }}
+                            {{ form.contact_phone(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.payment_details.label(class="form-label") }}
+                        {{ form.payment_details(class="form-control", placeholder="e.g., your-upi-id@bank") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows=4) }}
+                    </div>
+
+                    <h4 class="mt-4">Update Requirements</h4>
+                    <div class="mb-3">
+                        {{ form.req_grocery.label(class="form-label") }}
+                        {{ form.req_grocery(class="form-control", rows=2) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.req_clothes.label(class="form-label") }}
+                        {{ form.req_clothes(class="form-control", rows=2) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.req_stationary.label(class="form-label") }}
+                        {{ form.req_stationary(class="form-control", rows=2) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.req_medical.label(class="form-label") }}
+                        {{ form.req_medical(class="form-control", rows=2) }}
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

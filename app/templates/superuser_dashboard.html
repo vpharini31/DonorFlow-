@@ -1,0 +1,105 @@
+{% extends "superuser_base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-shield-lock-fill"></i> Superuser Dashboard</h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i> Platform Overview
+            </div>
+            <div class="card-body">
+                <canvas id="homesChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-file-earmark-text"></i> Administrative Actions
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center">
+                <p class="text-muted">Generate a complete report of all registered homes for compliance and auditing.</p>
+                <a href="{{ url_for('routes.export_homes_csv') }}" class="btn btn-primary"><i class="bi bi-download"></i> Download Homes Report (CSV)</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Pending Verifications</h3>
+<p class="text-muted">Review the details below carefully before verifying a home.</p>
+
+{% if homes %}
+    {% for home in homes %}
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning-subtle">
+            <h5 class="mb-0">{{ home.name }} <small class="text-muted fs-6">(Admin: {{ home.admin.username }})</small></h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="card-subtitle mb-2 text-muted">General Information</h6>
+                    <p><strong>Address:</strong> {{ home.address }}</p>
+                    <p><strong>Home Contact:</strong> <a href="tel:{{ home.contact_phone }}">{{ home.contact_phone }}</a></p>
+                    <p><strong>Admin Phone:</strong> <a href="tel:{{ home.admin.phone_number }}">{{ home.admin.phone_number }}</a></p>
+                    <p><strong>Admin Email:</strong> <a href="mailto:{{ home.admin.email }}">{{ home.admin.email }}</a></p>
+                    <p><strong>Occupants:</strong> {{ home.occupant_count }}</p>
+                    <p><strong>Payment Details:</strong> {{ home.payment_details }}</p>
+                    <p><strong>Description:</strong> {{ home.description }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="card-subtitle mb-2 text-muted">Stated Requirements</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 py-1"><strong>Groceries:</strong> {{ home.req_grocery or 'N/A' }}</li>
+                        <li class="list-group-item px-0 py-1"><strong>Clothes:</strong> {{ home.req_clothes or 'N/A' }}</li>
+                        <li class="list-group-item px-0 py-1"><strong>Stationary:</strong> {{ home.req_stationary or 'N/A' }}</li>
+                        <li class="list-group-item px-0 py-1"><strong>Medical:</strong> {{ home.req_medical or 'N/A' }}</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="d-flex gap-2">
+                <form action="{{ url_for('routes.verify_home_web', home_id=home.id) }}" method="post" onsubmit="return confirm('Are you sure you want to verify this home? It will become visible to all donors.');">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-check-circle-fill"></i> Verify Home</button>
+                </form>
+                <form action="{{ url_for('routes.reject_home_web', home_id=home.id) }}" method="post" onsubmit="return confirm('Are you sure you want to REJECT and DELETE this home? This action cannot be undone.');">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash-fill"></i> Reject</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-success">No homes are currently pending verification. Good job!</div>
+{% endif %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch("{{ url_for('routes.superuser_stats') }}")
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('homesChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Verified Homes', 'Pending Verification'],
+                        datasets: [{
+                            data: [data.verified, data.pending],
+                            backgroundColor: ['#198754', '#ffc107'],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                    }
+                });
+            });
+    });
+</script>
+{% endblock %}

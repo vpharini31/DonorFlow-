@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="mb-4"><i class="bi bi-person-workspace"></i> Volunteer Hub</h1>
+    <p>Give the gift of your time. Sign up for a specific event or register your general interest to volunteer at a home.</p>
+
+    <h3 class="mt-5">Upcoming Volunteer Events</h3>
+    <hr>
+    {% if opportunities %}
+    {% for op in opportunities %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">{{ op.title }}</h5>
+            <span class="badge bg-info">{{ op.date.strftime('%A, %B %d, %Y') }}</span>
+        </div>
+        <div class="card-body">
+            <h6 class="card-subtitle mb-2 text-muted">
+                At: <a href="{{ url_for('home_detail', home_id=op.home.id) }}">{{ op.home.name }}</a>
+            </h6>
+            <p class="card-text">{{ op.description }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge rounded-pill text-bg-secondary">
+                        <i class="bi bi-people"></i> {{ op.attendees.count() }} / {{ op.required_volunteers }} volunteers
+                    </span>
+                </div>
+                <form action="{{ url_for('volunteer_signup', opportunity_id=op.id) }}" method="post">
+                    {% if op.is_user_signed_up(current_user) %}
+                        <button type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i> You're Signed Up</button>
+                    {% elif op.attendees.count() >= op.required_volunteers %}
+                        <button type="button" class="btn btn-secondary" disabled>Full</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">There are no volunteer opportunities available at the moment. Please check back later!</div>
+    {% endfor %}
+    {% endif %}
+
+    <h3 class="mt-5">General Volunteer Registrations</h3>
+    <p>This is a list of all users who have registered their interest to volunteer.</p>
+    <hr>
+    {% if registrations %}
+    <div class="card">
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for reg in registrations %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ reg.volunteer.username }}</strong> registered to volunteer at 
+                        <a href="{{ url_for('home_detail', home_id=reg.home.id) }}">{{ reg.home.name }}</a>
+                        <small class="d-block text-muted">Registered on: {{ reg.timestamp.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">{{ reg.days_to_volunteer }} Days Offered</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">No one has registered to volunteer yet. Be the first!</div>
+    {% endif %}
+{% endblock %}

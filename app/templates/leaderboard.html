@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="leaderboard-container">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Top Donors</h1>
+        <p class="lead text-muted">Celebrating our most generous contributors. Thank you for your impact!</p>
+    </div>
+
+    <div class="list-group">
+        {% for donor in donors %}
+            {# Set rank and special classes for top 3 #}
+            {% set rank = loop.index %}
+            {% set rank_class = '' %}
+            {% if rank == 1 %}
+                {% set rank_class = 'rank-1' %}
+            {% elif rank == 2 %}
+                {% set rank_class = 'rank-2' %}
+            {% elif rank == 3 %}
+                {% set rank_class = 'rank-3' %}
+            {% endif %}
+
+            <div class="leaderboard-item {{ rank_class }} {% if donor.id == current_user.id %}current-user-highlight{% endif %}">
+                <div class="leaderboard-rank">
+                    {% if rank == 1 %}<i class="bi bi-trophy-fill"></i>
+                    {% elif rank == 2 %}<i class="bi bi-award-fill"></i>
+                    {% elif rank == 3 %}<i class="bi bi-patch-check-fill"></i>
+                    {% else %}{{ rank }}
+                    {% endif %}
+                </div>
+                <div class="leaderboard-user">
+                    <div class="username"><i class="bi bi-person-fill"></i> {{ donor.username }}</div>
+                </div>
+                <div class="leaderboard-points">{{ donor.points }} pts</div>
+            </div>
+        {% else %}
+            <p class="text-center">The leaderboard is empty. Be the first to make a donation!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

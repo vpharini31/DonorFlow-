@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h1 class="card-title mb-0">{{ home.name }} {% if home.is_verified %}<i class="bi bi-patch-check-fill text-primary fs-3" title="Verified Organization"></i>{% endif %}</h1>
+    </div>
+    <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted">
+            <i class="bi bi-geo-alt-fill"></i> {{ home.address }} | 
+            <i class="bi bi-people-fill"></i> {{ home.occupant_count }} Occupants |
+            <i class="bi bi-telephone-fill"></i> <a href="tel:{{ home.contact_phone }}" class="text-muted text-decoration-none">{{ home.contact_phone }}</a>
+        </h6>
+        <p class="card-text mt-3">{{ home.description }}</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <h4>Current Needs</h4>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% if home.req_grocery %}<li class="list-group-item"><strong><i class="bi bi-cart-fill text-success"></i> Groceries:</strong> {{ home.req_grocery }}</li>{% endif %}
+                {% if home.req_clothes %}<li class="list-group-item"><strong><i class="bi bi-person-bounding-box text-info"></i> Clothes:</strong> {{ home.req_clothes }}</li>{% endif %}
+                {% if home.req_stationary %}<li class="list-group-item"><strong><i class="bi bi-pencil-fill text-warning"></i> Stationary:</strong> {{ home.req_stationary }}</li>{% endif %}
+                {% if home.req_medical %}<li class="list-group-item"><strong><i class="bi bi-bandaid-fill text-danger"></i> Medical:</strong> {{ home.req_medical }}</li>{% endif %}
+            </ul>
+        </div>
+
+        <!-- In-Kind Donation Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4><i class="bi bi-box-seam"></i> Record In-Kind Donation</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Donating items like groceries or clothes? Record it here.</p>
+                <form action="{{ url_for('routes.donate_inkind') }}" method="post">
+                    {{ inkind_form.hidden_tag() }}
+                    <input type="hidden" name="home_id" value="{{ home.id }}">
+                    <div class="mb-3">
+                        {{ inkind_form.description.label(class="form-label") }}
+                        {{ inkind_form.description(class="form-control", rows=3, placeholder="e.g., 10kg Rice, 5 Notebooks") }}
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">Record Items</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <!-- Monetary Donation Section -->
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="bi bi-currency-rupee"></i> Monetary Support</h4>
+            </div>
+            <div class="card-body">
+                {% if home.payment_details %}
+                <div class="text-center mb-4">
+                <img src="{{ url_for('routes.generate_qr', home_id=home.id) }}" alt="Donate via UPI" class="img-fluid mb-3" style="max-width: 200px;">
+                <p class="fw-bold mb-1">UPI ID: {{ home.payment_details }}</p>
+                <small class="text-muted d-block">Scan to pay, then enter details below.</small>
+                </div>
+                {% endif %}
+                
+                <form action="{{ url_for('routes.donate_money') }}" method="post">
+                    {{ money_form.hidden_tag() }}
+                    <input type="hidden" name="home_id" value="{{ home.id }}">
+                    <div class="mb-3">
+                        {{ money_form.amount.label(class="form-label") }}
+                        {{ money_form.amount(class="form-control", placeholder="Amount in ₹") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ money_form.transaction_id.label(class="form-label") }}
+                        {{ money_form.transaction_id(class="form-control", placeholder="UPI Reference ID") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ money_form.description.label(class="form-label") }}
+                        {{ money_form.description(class="form-control", rows=2, placeholder="Optional message") }}
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Confirm Payment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
